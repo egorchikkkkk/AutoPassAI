@@ -1,19 +1,72 @@
 services:
   db:
     image: postgres:18
+    
     environment:
       POSTGRES_DB: autopassai
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      
     ports:
       - "5432:5432"
+      
     volumes:
       - postgres_data:/var/lib/postgresql
+      
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d autopassai"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+    networks:
+      - autopassai-network
+      
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      
+    environment:
+      APP_NAME: AutoPassAI
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/autopassai
+      
+    ports:
+      - "8000:8000"
+      
+    depends_on:
+      db:
+        condition: service_healthy
+        
+    healthcheck:
+      test:
+        [
+            "CMD-SHELL",
+            "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - autopassai-network
+
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+          
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   postgres_data:
+
+networks:
+  autopassai-network:
+    driver: bridge
