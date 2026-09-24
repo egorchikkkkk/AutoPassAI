@@ -1,0 +1,47 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff check
+        entry: uv run ruff check
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run ruff format --check
+        language: system
+        types: [python]
+
+      - id: check-file-size
+        name: Check file size
+        entry: bash
+        language: system
+        args:
+          - -c
+          - |
+            for file in "$@"; do
+              size=$(wc -c < "$file")
+              if [ "$size" -gt 1000000 ]; then
+                echo "File too large: $file"
+                exit 1
+              fi
+            done
+          - --
+        types: [file]
+
+      - id: trailing-whitespace
+        name: Check trailing whitespace
+        entry: bash
+        language: system
+        args:
+          - -c
+          - |
+            for file in "$@"; do
+              if grep -n '[[:blank:]]$' "$file" >/dev/null; then
+                echo "Trailing whitespace: $file"
+                exit 1
+              fi
+            done
+          - --
+        types: [text]
