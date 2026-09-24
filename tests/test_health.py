@@ -32,7 +32,7 @@ async def test_version() -> None:
 
     assert response.status_code == 200
     assert "version" in response.json()
-    assert response.json()["version"] == "0.1.0"
+    assert response.json()["version"] == "0.1.2"
 
 
 @pytest.mark.asyncio
