@@ -52,3 +52,17 @@ indent-style = "space"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/autopassai"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src/autopassai"]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+	"if TYPE_CHECKING:",
+	"if __name__ == .__main__.:"
+]

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     app_name: str = "AutoPassAI"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/autopassai"
 
     model_config = SettingsConfigDict(
         env_file=".env",
