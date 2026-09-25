@@ -1,9 +1,12 @@
 """Services for checking application dependencies."""
 
+import logging
 from time import perf_counter
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
+
+logger = logging.getLogger(__name__)
 
 
 async def check_database(engine: AsyncEngine) -> dict[str, object]:
@@ -17,9 +20,20 @@ async def check_database(engine: AsyncEngine) -> dict[str, object]:
 
         response_time_ms = (perf_counter() - started_at) * 1000
 
+        logger.info(
+            "Database health check succeeded: response_time_ms=%.2f",
+            response_time_ms,
+        )
+
         return {"status": "ok", "version": database_version, "response_time_ms": round(response_time_ms, 2)}
 
     except Exception as exc:
         response_time_ms = (perf_counter() - started_at) * 1000
+
+        logger.error(
+            "Database health check failed: response_time_ms=%.2f error=%s",
+            response_time_ms,
+            exc,
+        )
 
         return {"status": "error", "error": str(exc), "response_time_ms": round(response_time_ms, 2)}
