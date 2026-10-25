@@ -22,6 +22,124 @@ services:
     networks:
       - autopassai-network
 
+  mlflow-db:
+    image: postgres:18
+
+    environment:
+      POSTGRES_DB: ${MLFLOW_DB_NAME}
+      POSTGRES_USER: ${MLFLOW_DB_USER}
+      POSTGRES_PASSWORD: ${MLFLOW_DB_PASSWORD}
+
+    volumes:
+      - mlflow_postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow -d mlflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - autopassai-network
+
+  minio:
+    image: pgsty/silo:RELEASE.2026-10-18T00-00-00Z
+
+    command: ["server", "/data", "--console-address", ":9001"]
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+    volumes:
+      - minio_data:/data
+
+    healthcheck:
+      test: ["CMD", "silo", "healthcheck", "ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+
+    networks:
+      - autopassai-network
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.17.1-full
+
+    command:
+      - mlflow
+      - server
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - "postgresql+psycopg2://${MLFLOW_DB_USER}:${MLFLOW_DB_PASSWORD}@mlflow-db:5432/${MLFLOW_DB_NAME}"
+      - --serve-artifacts
+      - --artifacts-destination
+      - "s3://mlflow-artifacts"
+      - --allowed-hosts
+      - "localhost:*,127.0.0.1:*,mlflow:*"
+
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      AWS_DEFAULT_REGION: us-east-1
+
+    ports:
+      - "127.0.0.1:5050:5000"
+
+    depends_on:
+      mlflow-db:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+      minio:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3).close()"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      - autopassai-network
+
+  minio-init:
+    image: pgsty/silo:RELEASE.2026-10-18T00-00-00Z
+
+    entrypoint: ["/bin/sh", "-c"]
+
+    command:
+      - |
+        mcli alias set storage http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}" &&
+        mcli mb --ignore-existing storage/mlflow-artifacts
+
+    restart: "no"
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+    depends_on:
+      minio:
+        condition: service_healthy
+
+    networks:
+      - autopassai-network
+
   app:
     build:
       context: .
@@ -66,6 +184,8 @@ services:
 
 volumes:
   postgres_data:
+  mlflow_postgres_data:
+  minio_data:
 
 networks:
   autopassai-network:
