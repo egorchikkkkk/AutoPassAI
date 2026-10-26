@@ -1,5 +1,6 @@
 """Tests for health-check API endpoints."""
 
+from importlib.metadata import version
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -32,7 +33,7 @@ async def test_version() -> None:
 
     assert response.status_code == 200
     assert "version" in response.json()
-    assert response.json()["version"] == "0.1.2"
+    assert response.json()["version"] == version("autopassai")
 
 
 @pytest.mark.asyncio

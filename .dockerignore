@@ -1,0 +1,32 @@
+# Git
+.git/
+
+# Local environments and cache
+.venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local settings / secrets
+.env
+.env.local
+
+# Images / original dataset
+mlops_dataset/
+data/raw/
+
+# Training results
+checkpoints/
+checkpoints_resize/
+reports/
+evaluation*/
+audit/
+
+# MLflow local storages
+mlruns/
+mlartifacts/
+
+# macOS system files
+.DS_Store

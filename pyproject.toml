@@ -1,7 +1,7 @@
 [project]
 name = "autopassai"
 version = "0.1.2"
-description = "Add your description here"
+description = "Service for license plates recognition."
 readme = "README.md"
 authors = [
     { name = "egorchikkkkk", email = "egoriachmennikov@gmail.com" }
@@ -14,9 +14,6 @@ dependencies = [
     "sqlalchemy>=2.0.54",
     "uvicorn[standard]>=0.53.0",
 ]
-
-[project.scripts]
-autopassai = "autopassai:main"
 
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
@@ -49,9 +46,6 @@ select = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/autopassai"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
