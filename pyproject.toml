@@ -28,6 +28,12 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "ruff>=0.16.8",
 ]
+ml = [
+    "matplotlib>=3.11.2",
+    "mlflow==3.17.1",
+    "pandas>=3.1.0",
+    "pillow>=13.0.0",
+]
 
 [tool.ruff]
 line-length = 110
