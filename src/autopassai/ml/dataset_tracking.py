@@ -1,3 +1,4 @@
+import csv
 import json
 from pathlib import Path
 
@@ -5,6 +6,37 @@ import mlflow
 import pandas as pd
 
 from autopassai.ml.data_manifest import file_sha256
+
+
+def verify_image_contents(manifest_dir: Path, image_dir: Path, splits: list[str]) -> dict[str, str]:
+    with (manifest_dir / "dataset_metadata.json").open(encoding="utf-8") as file:
+        metadata = json.load(file)
+
+    manifest_hashes = {}
+
+    for split in splits:
+        info = metadata["splits"][split]
+        manifest_path = manifest_dir / info["manifest_file"]
+
+        actual_hash = file_sha256(manifest_path)
+
+        if actual_hash != info["manifest_sha256"]:
+            raise ValueError(f"Manifest изменился: {manifest_path}")
+
+        with manifest_path.open(encoding="utf-8", newline="") as file:
+            rows = list(csv.DictReader(file))
+
+        for row in rows:
+            image_path = image_dir / row["images"]
+
+            if file_sha256(image_path) != row["sha256"]:
+                raise ValueError(f"Изображение изменилось: {image_path}")
+
+        manifest_hashes[split] = actual_hash
+
+        print(f"{split}: проверено {len(rows)} изображений", flush=True)
+
+    return manifest_hashes
 
 
 def log_dataset_inputs(manifest_dir: Path, splits: list[str], splits_dir: Path, context: str) -> None:

@@ -1,0 +1,26 @@
+[experiment]
+name = "autopassai-crnn"
+run_name = "baseline-pad"
+
+[preprocessing]
+mode = "pad"
+height = 32
+width = 160
+
+[model]
+hidden_size = 128
+
+[training]
+seed = 42
+batch_size = 32
+epochs = 20
+num_workers = 0
+
+learning_rate = 0.001
+lr_switch_epoch = 11
+new_learning_rate = 0.0003
+reset_optimizer_on_switch = true
+
+gradient_clip_norm = 5.0
+checkpoint_metric = "val_accuracy"
+checkpoint_mode = "max"
