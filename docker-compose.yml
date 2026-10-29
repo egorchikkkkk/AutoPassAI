@@ -148,6 +148,7 @@ services:
     environment:
       APP_NAME: AutoPassAI
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/autopassai
+      MLFLOW_ENABLE_PROXY_MULTIPART_DOWNLOAD: "false"
 
     ports:
       - "8000:8000"
