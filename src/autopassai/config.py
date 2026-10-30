@@ -10,6 +10,9 @@ class Settings(BaseSettings):
 
     app_name: str = "AutoPassAI"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/autopassai"
+    mlflow_tracking_uri: str = "http://127.0.0.1:5050"
+    mlflow_model_name: str = "autopassai-crnn"
+    mlflow_model_alias: str = "champion"
 
     model_config = SettingsConfigDict(
         env_file=".env",

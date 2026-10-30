@@ -149,12 +149,17 @@ services:
       APP_NAME: AutoPassAI
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/autopassai
       MLFLOW_ENABLE_PROXY_MULTIPART_DOWNLOAD: "false"
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_MODEL_NAME: ${MLFLOW_MODEL_NAME}
+      MLFLOW_MODEL_ALIAS: ${MLFLOW_MODEL_ALIAS}
 
     ports:
       - "8000:8000"
 
     depends_on:
       db:
+        condition: service_healthy
+      mlflow:
         condition: service_healthy
 
     healthcheck:
@@ -166,7 +171,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 60s
 
     networks:
       - autopassai-network
@@ -175,7 +180,7 @@ services:
       resources:
         limits:
           cpus: "1.0"
-          memory: 512M
+          memory: 2G
 
     logging:
       driver: json-file

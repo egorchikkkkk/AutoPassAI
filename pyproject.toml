@@ -1,6 +1,6 @@
 [project]
 name = "autopassai"
-version = "0.1.2"
+version = "0.2.0"
 description = "Service for license plates recognition."
 readme = "README.md"
 authors = [
@@ -27,6 +27,15 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "ruff>=0.16.8",
+]
+inference = [
+    "cloudpickle>=3.1.2",
+    "mlflow==3.17.1",
+    "pandas>=3.1.0",
+    "pillow>=13.0.0",
+    "python-multipart>=0.0.32",
+    "torch==2.14.1",
+    "torchvision==0.29.1",
 ]
 ml = [
     "matplotlib>=3.11.2",
@@ -67,4 +76,17 @@ branch = true
 exclude_also = [
 	"if TYPE_CHECKING:",
 	"if __name__ == .__main__.:"
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
 ]
